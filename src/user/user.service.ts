@@ -3,9 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UserEntity } from './user.entity';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
 import { JWT_SECRET } from '@app/config';
 import { UserResponseInterface } from '@app/types/userResponse.interface';
+import { LoginUserDto } from './dto/loginUser.dto';
+import { hash, compare as compareHash } from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -26,6 +28,26 @@ export class UserService {
         const newUser = new UserEntity();
         Object.assign(newUser, createUserDto);
         return await this.userRepository.save(newUser);
+    }
+
+    async loginUser(loginUserDto: LoginUserDto): Promise<UserEntity> {
+        const loginUser = await this.userRepository.findOne({
+            email: loginUserDto.email
+        }, {select: ['id', 'username', 'email', 'bio', 'image', 'password']});
+
+        if(!loginUser){
+            throw new HttpException('Invalid credentials', HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        const isLoginAuth = await compareHash(loginUserDto.password, loginUser.password);
+
+        if(!isLoginAuth){
+            throw new HttpException('Invalid credentials', HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        delete loginUser.password;
+        
+        return loginUser;
     }
 
     buildUserResponse(user: UserEntity): UserResponseInterface {
