@@ -1,5 +1,5 @@
 import { AppRequest } from '@app/types/appRequest.interface';
-import { UserResponseInterface } from '@app/types/userResponse.interface';
+import { UserResponseInterface } from '@app/user/types/userResponse.interface';
 import { Body, Controller, Get, Post, Req, UsePipes, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
