@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UserEntity } from './user.entity';
-import { sign, verify } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 import { JWT_SECRET } from '@app/config';
 import { UserResponseInterface } from '@app/types/userResponse.interface';
 import { LoginUserDto } from './dto/loginUser.dto';
@@ -16,6 +16,10 @@ export class UserService {
         @InjectRepository(UserEntity) 
         private readonly userRepository: Repository<UserEntity>
     ) {};
+
+    async getUser(id: number): Promise<UserEntity> {
+        return this.userRepository.findOne(id);
+    }
 
     async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
         const userByEmail = await this.userRepository.findOne({email: createUserDto.email});

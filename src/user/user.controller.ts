@@ -1,5 +1,6 @@
+import { AppRequest } from '@app/types/appRequest.interface';
 import { UserResponseInterface } from '@app/types/userResponse.interface';
-import { Body, Controller, Get, Post, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UsePipes, ValidationPipe, HttpException, HttpStatus } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { UserService } from './user.service';
@@ -15,6 +16,15 @@ export class UserController {
     async createUser(@Body('user') createUserDto: CreateUserDto): Promise<UserResponseInterface>{
         const user = await this.userService.createUser(createUserDto);
         return this.userService.buildUserResponse(user);
+    }
+
+    @Get()
+    async getCurrentUser(@Req() request: AppRequest): Promise<UserResponseInterface>{
+        if(!request.user) {
+            throw new HttpException("Invalid authorization token", HttpStatus.UNPROCESSABLE_ENTITY);
+        }
+
+        return this.userService.buildUserResponse(request.user);
     }
 
     @Post('/login')
