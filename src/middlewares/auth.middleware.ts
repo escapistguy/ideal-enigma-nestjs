@@ -15,7 +15,6 @@ export class AuthMiddleware implements NestMiddleware {
             try{
                 const token = req.headers.authorization.split(" ")[1];
                 const decodedToken = verify(token, JWT_SECRET);
-                console.log(decodedToken.id);
                 req.user = await this.userService.getUser(decodedToken.id);
             } catch(error) {
                 console.warn(`Error trying to verify authorization token. authorization: ${req.headers.authorization}, error: ${error}`);
