@@ -7,6 +7,8 @@ import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import slugify from 'slugify';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
+import { GetArticlesDto } from './dto/getArticles.dto';
+import { ArticlesResponseInterface } from './types/articlesResponse.interface';
 @Injectable()
 export class ArticleService {
     constructor(
@@ -47,6 +49,33 @@ export class ArticleService {
         }
     }
 
+    async getArticles(userId: number, getArticlesDto: GetArticlesDto) : Promise<ArticlesResponseInterface>{ 
+        const limit = getArticlesDto.limit;
+        const offset = getArticlesDto.offset;
+        const author = getArticlesDto.author;
+        const tag = getArticlesDto.tag;
+
+        let queryBuilder = this.articleRepository
+            .createQueryBuilder("article")
+            .leftJoinAndSelect("article.author", "author");
+
+        author && queryBuilder.andWhere("author.id = :authorId", {authorId: author});
+        tag && queryBuilder.andWhere("article.tagList like :tag", {tag: `%${tag}%`});    
+            
+        let articlesCount = await queryBuilder.getCount();    
+
+            queryBuilder.limit(limit)
+                        .offset(offset);
+
+        queryBuilder.orderBy("article.createdAt", "DESC");
+        let articles = (await queryBuilder.getMany()).map(article => this.buildArticleResponse(article));
+
+        return {
+            articles,
+            articlesCount
+        };
+    }
+
     async getArticleBySlug(slug: string): Promise<ArticleEntity> {
         const article = await this.articleRepository.findOne({slug});
 
@@ -81,7 +110,7 @@ export class ArticleService {
         if(updateArticleDto.title) {
             article.slug = ArticleService.generateSlug(updateArticleDto.title);
         }
-        
+
         return this.articleRepository.save(article);
     }
 
