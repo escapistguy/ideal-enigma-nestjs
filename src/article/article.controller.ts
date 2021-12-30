@@ -6,7 +6,6 @@ import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
 import { PATH_PARAMS } from './article.constants';
-import { DeleteResult } from 'typeorm';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
 import { GetArticlesDto } from './dto/getArticles.dto';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
@@ -57,5 +56,21 @@ export class ArticleController {
         const updatedArticle = await this.articleService.updateArticle(userId, slug, updateArticleDto);
 
         return this.articleService.buildArticleResponse(updatedArticle);
+    }
+
+    @Post(`/:${PATH_PARAMS.SLUG}/favorite`)
+    @UseGuards(AuthGuard)
+    async addArticleToFavorites(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
+        const favoritedArticle = await this.articleService.addArticleToFavorites(userId, slug);
+
+        return this.articleService.buildArticleResponse(favoritedArticle);
+    }
+
+    @Delete(`/:${PATH_PARAMS.SLUG}/favorite`)
+    @UseGuards(AuthGuard)
+    async removeArticleToFavorites(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
+        const favoritedArticle = await this.articleService.removeArticleToFavorites(userId, slug);
+
+        return this.articleService.buildArticleResponse(favoritedArticle);
     }
 }

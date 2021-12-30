@@ -1,9 +1,9 @@
 import { IsNotEmpty, IsNumber } from "class-validator";
 
 export class GetArticlesDto {
-    readonly favorited?: boolean;
+    readonly favorited?: string;
 
-    readonly author?: number;
+    readonly author?: string;
 
     readonly tag?: string;
 
