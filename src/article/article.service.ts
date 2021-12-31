@@ -9,13 +9,17 @@ import slugify from 'slugify';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
 import { GetArticlesDto } from './dto/getArticles.dto';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
+import { GetArticlesFeedDto } from './dto/getArticlesFeed.dto';
+import { FollowEntity } from '@app/profile/follow.entity';
 @Injectable()
 export class ArticleService {
     constructor(
         @InjectRepository(ArticleEntity) 
         private readonly articleRepository: Repository<ArticleEntity>,
         @InjectRepository(UserEntity) 
-        private readonly userRepository: Repository<UserEntity>
+        private readonly userRepository: Repository<UserEntity>,
+        @InjectRepository(FollowEntity) 
+        private readonly followRepository: Repository<FollowEntity>
     ) {};
 
     async createArticle(user: UserEntity, createArticleDto: CreateArticleDto): Promise<ArticleEntity> {
@@ -84,6 +88,53 @@ export class ArticleService {
                 }
             }
         }
+
+        queryBuilder.orderBy("articles.createdAt", "DESC");
+
+        let articlesCount = await queryBuilder.getCount();    
+
+        if(query.limit) {
+            queryBuilder.limit(query.limit);
+        }
+
+        if(query.offset) {
+            queryBuilder.offset(query.offset);
+        }
+        
+        let favoriteIds: number[] = [];
+        if (userId) {
+            const currentUser = await this.userRepository.findOne(userId, {
+                relations: ['favoriteArticles'],
+            });
+            favoriteIds = currentUser.favoriteArticles.map((favorite) => favorite.id);
+        }
+
+        const articles: ArticleEntity[] = await queryBuilder.getMany();
+        const parsedArticles: ArticleResponseInterface[] = articles
+            .map((article) => (this.buildArticleResponse(article, favoriteIds.includes(article.id))));
+        return {
+            articles: parsedArticles,
+            articlesCount
+        };
+    }
+
+    async getFeed(userId: number, query: GetArticlesFeedDto) : Promise<ArticlesResponseInterface>{ 
+        let followedUsers = await this.followRepository.find({
+            followerId: userId
+        })
+
+        if(followedUsers.length === 0) {
+            return {
+                articles: [],
+                articlesCount: 0
+            }
+        }
+
+        const followedUserIds = followedUsers.map(user=>user.followingId);
+        let queryBuilder = this.articleRepository
+            .createQueryBuilder("articles")
+            .leftJoinAndSelect("articles.author", "author")
+            .andWhere("author.id in (:...ids)", {ids: followedUserIds});
 
         queryBuilder.orderBy("articles.createdAt", "DESC");
 

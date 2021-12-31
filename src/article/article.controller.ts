@@ -9,6 +9,7 @@ import { PARAMS } from './article.constants';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
 import { GetArticlesDto } from './dto/getArticles.dto';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
+import { GetArticlesFeedDto } from './dto/getArticlesFeed.dto';
 
 @Controller('articles')
 export class ArticleController {
@@ -19,6 +20,13 @@ export class ArticleController {
     @UsePipes(new ValidationPipe({transform: true}))
     async getAllArticles(@User('id') userId: number, @Query() query: GetArticlesDto): Promise<ArticlesResponseInterface> {
         return await this.articleService.getArticles(userId, query);
+    }
+
+    @Get("/feed")
+    @UsePipes(new ValidationPipe({transform: true}))
+    @UseGuards(AuthGuard)
+    async getFeed(@User('id') userId: number, @Query() query: GetArticlesFeedDto): Promise<ArticlesResponseInterface> {
+        return await this.articleService.getFeed(userId, query);
     }
 
     @Post()
