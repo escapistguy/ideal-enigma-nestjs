@@ -1,3 +1,4 @@
+import { ValidationErrorResponse } from '@app/pipes/mediumValidation.pipe';
 import { UserEntity } from '@app/user/user.entity';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -38,7 +39,12 @@ export class ProfileService {
         }
 
         if(user.id === currentUserId) {
-            throw new HttpException("Follower and following users can't be equal", HttpStatus.BAD_REQUEST);
+            const errorResponse: ValidationErrorResponse = {
+                errors: {
+                    username: ["Follower and following users can't be equal"]
+                }
+            };
+            throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         let follow = await this.followEntity.findOne({
@@ -65,7 +71,12 @@ export class ProfileService {
         }
 
         if(user.id === currentUserId) {
-            throw new HttpException("Follower and following users can't be equal", HttpStatus.BAD_REQUEST);
+            const errorResponse: ValidationErrorResponse = {
+                errors: {
+                    username: ["Follower and following users can't be equal"]
+                }
+            };
+            throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         await this.followEntity.delete({

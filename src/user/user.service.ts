@@ -9,6 +9,7 @@ import { UserResponseInterface } from '@app/user/types/userResponse.interface';
 import { LoginUserDto } from './dto/loginUser.dto';
 import { hash, compare as compareHash } from 'bcrypt';
 import { UpdateUserDto } from './dto/updateUser.dto';
+import { ValidationErrorResponse } from '@app/pipes/mediumValidation.pipe';
 
 @Injectable()
 export class UserService {
@@ -23,11 +24,25 @@ export class UserService {
     }
 
     async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
-        const userByEmail = await this.userRepository.findOne({email: createUserDto.email});
-        const userByUsername = await this.userRepository.findOne({username: createUserDto.username});
         
-        if(userByEmail || userByUsername){
-            throw new HttpException('Email or username are taken', HttpStatus.UNPROCESSABLE_ENTITY);
+        const errorResponse: ValidationErrorResponse = {errors: {}};
+
+        const userByEmail = await this.userRepository.findOne({email: createUserDto.email});
+        if(userByEmail) {
+            errorResponse.errors["email"] = [
+                "Email is taken"
+            ];
+        }
+
+        const userByUsername = await this.userRepository.findOne({username: createUserDto.username});
+        if(userByUsername){
+            errorResponse.errors["usename"] = [
+                "Username is taken"
+            ];
+        }
+
+        if(Object.keys(errorResponse.errors).length > 0){
+            throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         const newUser = new UserEntity();
@@ -39,17 +54,28 @@ export class UserService {
         const user = await this.getUser(userId);
 
         if(!user) {
-            throw new HttpException("User not found", HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new HttpException("User not found", HttpStatus.NOT_FOUND);
         }
 
         Object.assign(user, updateUserDto);
-        
-        const userByEmail = await this.userRepository.findOne({id: Not(user.id),email: user.email});
-        const userByUsername = await this.userRepository.findOne({id: Not(user.id), username: user.username});
-        
 
-        if(userByEmail || userByUsername){
-            throw new HttpException('Email or username are taken', HttpStatus.UNPROCESSABLE_ENTITY);
+        const errorResponse: ValidationErrorResponse = {errors: {}};
+        const userByEmail = await this.userRepository.findOne({email: updateUserDto.email});
+        if(userByEmail) {
+            errorResponse.errors["email"] = [
+                "Email is taken"
+            ];
+        }
+
+        const userByUsername = await this.userRepository.findOne({username: updateUserDto.username});
+        if(userByUsername){
+            errorResponse.errors["usename"] = [
+                "Username is taken"
+            ];
+        }
+
+        if(Object.keys(errorResponse.errors).length > 0){
+            throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         return await this.userRepository.save(user);
@@ -61,13 +87,13 @@ export class UserService {
         }, {select: ['id', 'username', 'email', 'bio', 'image', 'password']});
 
         if(!loginUser){
-            throw new HttpException('Invalid credentials', HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new HttpException({errors: {"email or password": ["is invalid"]}}, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         const isLoginAuth = await compareHash(loginUserDto.password, loginUser.password);
 
         if(!isLoginAuth){
-            throw new HttpException('Invalid credentials', HttpStatus.UNPROCESSABLE_ENTITY);
+            throw new HttpException({errors: {"email or password": ["is invalid"]}}, HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         delete loginUser.password;
