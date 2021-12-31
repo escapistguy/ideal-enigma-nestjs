@@ -1,4 +1,4 @@
 
-export const PATH_PARAMS = {
+export const PARAMS = {
     SLUG: "slug"
 };

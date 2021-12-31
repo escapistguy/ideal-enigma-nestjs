@@ -33,9 +33,9 @@ export class ArticleService {
         return await this.articleRepository.save(article);
     }
 
-    buildArticleResponse(article: ArticleEntity): ArticleResponseInterface{
+    buildArticleResponse(article: ArticleEntity, favorited?: boolean): ArticleResponseInterface{
         const author = article.author;
-        return {
+        let articleResponse: ArticleResponseInterface = {
             slug: article.slug,
             title: article.title,
             description: article.description,
@@ -48,7 +48,9 @@ export class ArticleService {
                 bio: author.bio,
                 image: author.image
             }
-        }
+        };
+        favorited !== undefined && (articleResponse.favorited = favorited);
+        return articleResponse;
     }
 
     async getArticles(userId: number, query: GetArticlesDto) : Promise<ArticlesResponseInterface>{ 
@@ -103,13 +105,11 @@ export class ArticleService {
             favoriteIds = currentUser.favoriteArticles.map((favorite) => favorite.id);
         }
 
-        const articles = (await queryBuilder.getMany())
-            .map((article) => ({
-                ...article, 
-                favorited: favoriteIds.includes(article.id)
-            }));
+        const articles: ArticleEntity[] = await queryBuilder.getMany();
+        const parsedArticles: ArticleResponseInterface[] = articles
+            .map((article) => (this.buildArticleResponse(article, favoriteIds.includes(article.id))));
         return {
-            articles,
+            articles: parsedArticles,
             articlesCount
         };
     }

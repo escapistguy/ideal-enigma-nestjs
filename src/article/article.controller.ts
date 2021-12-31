@@ -5,7 +5,7 @@ import { Body, Controller, Delete, Get, HttpCode, HttpException, HttpStatus, Par
 import { ArticleService } from './article.service';
 import { CreateArticleDto } from './dto/createArticle.dto';
 import { ArticleResponseInterface } from './types/articleResponse.interface';
-import { PATH_PARAMS } from './article.constants';
+import { PARAMS } from './article.constants';
 import { UpdateArticleDto } from './dto/updateArticle.dto';
 import { GetArticlesDto } from './dto/getArticles.dto';
 import { ArticlesResponseInterface } from './types/articlesResponse.interface';
@@ -29,17 +29,17 @@ export class ArticleController {
         return this.articleService.buildArticleResponse(article);
     }
 
-    @Get(`/:${PATH_PARAMS.SLUG}`)
+    @Get(`/:${PARAMS.SLUG}`)
     @UsePipes(new ValidationPipe())
-    async getSingleArticle(@Param(PATH_PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
+    async getSingleArticle(@Param(PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
         const article = await this.articleService.getArticleBySlug(slug);
         return this.articleService.buildArticleResponse(article);
     }
 
-    @Delete(`/:${PATH_PARAMS.SLUG}`)
+    @Delete(`/:${PARAMS.SLUG}`)
     @UseGuards(AuthGuard)
     @UsePipes(new ValidationPipe())
-    async deleteSingleArticle(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string): Promise<HttpStatus> {
+    async deleteSingleArticle(@User('id') userId: number, @Param(PARAMS.SLUG) slug: string): Promise<HttpStatus> {
         const deleteResult = await this.articleService.deleteArticle(userId, slug);
 
         if(!deleteResult.affected) {
@@ -49,26 +49,26 @@ export class ArticleController {
         return HttpStatus.OK;
     }
 
-    @Put(`/:${PATH_PARAMS.SLUG}`)
+    @Put(`/:${PARAMS.SLUG}`)
     @UseGuards(AuthGuard)
     @UsePipes(new ValidationPipe())
-    async updateSingleArticle(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string, @Body('article') updateArticleDto: UpdateArticleDto): Promise<ArticleResponseInterface> {
+    async updateSingleArticle(@User('id') userId: number, @Param(PARAMS.SLUG) slug: string, @Body('article') updateArticleDto: UpdateArticleDto): Promise<ArticleResponseInterface> {
         const updatedArticle = await this.articleService.updateArticle(userId, slug, updateArticleDto);
 
         return this.articleService.buildArticleResponse(updatedArticle);
     }
 
-    @Post(`/:${PATH_PARAMS.SLUG}/favorite`)
+    @Post(`/:${PARAMS.SLUG}/favorite`)
     @UseGuards(AuthGuard)
-    async addArticleToFavorites(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
+    async addArticleToFavorites(@User('id') userId: number, @Param(PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
         const favoritedArticle = await this.articleService.addArticleToFavorites(userId, slug);
 
         return this.articleService.buildArticleResponse(favoritedArticle);
     }
 
-    @Delete(`/:${PATH_PARAMS.SLUG}/favorite`)
+    @Delete(`/:${PARAMS.SLUG}/favorite`)
     @UseGuards(AuthGuard)
-    async removeArticleToFavorites(@User('id') userId: number, @Param(PATH_PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
+    async removeArticleToFavorites(@User('id') userId: number, @Param(PARAMS.SLUG) slug: string): Promise<ArticleResponseInterface> {
         const favoritedArticle = await this.articleService.removeArticleToFavorites(userId, slug);
 
         return this.articleService.buildArticleResponse(favoritedArticle);
