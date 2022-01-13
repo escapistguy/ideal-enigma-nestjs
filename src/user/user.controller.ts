@@ -9,7 +9,7 @@ import { AuthGuard } from './guards/auth.guard';
 import { UserEntity } from './user.entity';
 import { UserService } from './user.service';
 
-@Controller('users')
+@Controller(['users', 'user'])
 export class UserController {
 
 

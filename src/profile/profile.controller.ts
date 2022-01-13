@@ -4,7 +4,7 @@ import { Controller, Delete, Get, Param, Post, Query, UseGuards } from '@nestjs/
 import { ProfileService } from './profile.service';
 import { ProfileResponseInterface } from './types/profileResponse.interface';
 
-@Controller('profile')
+@Controller('profiles')
 export class ProfileController {
     constructor(private readonly profileService: ProfileService) {};
 

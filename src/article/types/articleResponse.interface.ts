@@ -22,19 +22,21 @@ export interface ArticleResponseInterface {
         }
     }
      */
-    slug: string
-    title: string
-    description: string
-    body: string
-    createdAt: Date
-    updatedAt: Date
-    favorited? : boolean
-    favoritesCount? : number
-    tagList: string[]
-    author: {
-        username: string
-        bio: string
-        image: string
-        following?: boolean
+    article: {
+        slug: string
+        title: string
+        description: string
+        body: string
+        createdAt: Date
+        updatedAt: Date
+        favoritesCount? : number
+        tagList: string[]
+        author: {
+            username: string
+            bio: string
+            image: string
+            following?: boolean
+        },
+        favorited? : boolean
     }
 }

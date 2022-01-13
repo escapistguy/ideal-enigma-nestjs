@@ -60,17 +60,17 @@ export class UserService {
         Object.assign(user, updateUserDto);
 
         const errorResponse: ValidationErrorResponse = {errors: {}};
-        const userByEmail = await this.userRepository.findOne({email: updateUserDto.email});
+        const userByEmail = await this.userRepository.findOne({email: updateUserDto.email, id: Not(userId)});
         if(userByEmail) {
             errorResponse.errors["email"] = [
-                "Email is taken"
+                `${updateUserDto.email} is taken`
             ];
         }
 
-        const userByUsername = await this.userRepository.findOne({username: updateUserDto.username});
+        const userByUsername = await this.userRepository.findOne({username: updateUserDto.username, id: Not(userId)});
         if(userByUsername){
             errorResponse.errors["usename"] = [
-                "Username is taken"
+                `${updateUserDto.username} is taken`
             ];
         }
 

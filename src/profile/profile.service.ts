@@ -89,11 +89,13 @@ export class ProfileService {
 
     buildProfileResponse(user:UserEntity, following: boolean): ProfileResponseInterface {
         return {
-            id: user.id,
-            username: user.username,
-            bio: user.bio,
-            image: user.image,
-            following
+            profile: {
+                id: user.id,
+                username: user.username,
+                bio: user.bio,
+                image: user.image,
+                following
+            }
         }
     }
 }

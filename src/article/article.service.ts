@@ -40,6 +40,29 @@ export class ArticleService {
     buildArticleResponse(article: ArticleEntity, favorited?: boolean): ArticleResponseInterface{
         const author = article.author;
         let articleResponse: ArticleResponseInterface = {
+            article: {
+                slug: article.slug,
+                title: article.title,
+                description: article.description,
+                body: article.body,
+                createdAt: article.createdAt,
+                updatedAt: article.updatedAt,
+                tagList: article.tagList,
+                favoritesCount: article.favoritesCount,
+                author: {
+                    username: author.username,
+                    bio: author.bio,
+                    image: author.image
+                }
+            }
+        };
+        favorited !== undefined && (articleResponse.article.favorited = favorited);
+        return articleResponse;
+    }
+
+    buildArticlesResponse(article: ArticleEntity, favorited?: boolean): any{
+        const author = article.author;
+        let articleResponse :any = {
             slug: article.slug,
             title: article.title,
             description: article.description,
@@ -47,6 +70,7 @@ export class ArticleService {
             createdAt: article.createdAt,
             updatedAt: article.updatedAt,
             tagList: article.tagList,
+            favoritesCount: article.favoritesCount,
             author: {
                 username: author.username,
                 bio: author.bio,
@@ -110,8 +134,8 @@ export class ArticleService {
         }
 
         const articles: ArticleEntity[] = await queryBuilder.getMany();
-        const parsedArticles: ArticleResponseInterface[] = articles
-            .map((article) => (this.buildArticleResponse(article, favoriteIds.includes(article.id))));
+        const parsedArticles = articles
+            .map((article) => (this.buildArticlesResponse(article, favoriteIds.includes(article.id))));
         return {
             articles: parsedArticles,
             articlesCount
@@ -157,8 +181,8 @@ export class ArticleService {
         }
 
         const articles: ArticleEntity[] = await queryBuilder.getMany();
-        const parsedArticles: ArticleResponseInterface[] = articles
-            .map((article) => (this.buildArticleResponse(article, favoriteIds.includes(article.id))));
+        const parsedArticles = articles
+            .map((article) => (this.buildArticlesResponse(article, favoriteIds.includes(article.id))));
         return {
             articles: parsedArticles,
             articlesCount
