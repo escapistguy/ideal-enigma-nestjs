@@ -30,7 +30,7 @@ export class MediumValidationPipe implements PipeTransform {
     async transform(value: any, metadata: ArgumentMetadata) {
         const object = plainToClass(metadata.metatype, value);
         
-        if(typeof object !== 'object') {
+        if(typeof object !== 'object' || object == null) {
             return value;
         }
 
